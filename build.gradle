@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+group 'fr.antoineok'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
+}
