@@ -1,19 +1,22 @@
 package fr.antoineok.minelaup;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import com.sun.istack.internal.NotNull;
 import fr.antoineok.minelaup.exceptions.*;
-import org.jetbrains.annotations.NotNull;
+import fr.antoineok.minelaup.modeles.LauncherModel;
+import fr.antoineok.minelaup.modeles.ModPackModel;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"unused"})
 public class MineLaup {
 
     private final String URL;
@@ -23,11 +26,14 @@ public class MineLaup {
     private final String API_KEY;
 
     final OkHttpClient client = new OkHttpClient();
+    
+    private final LauncherModel LAUNCHER_DATA;
 
     private static final String URL_REGEX =
             "^((https?://)(%[0-9A-Fa-f]{2}|[-()_.!~*';/?:@&=+$,A-Za-z0-9])+)([).!';/?:,][[:blank:]])?$";
 
-	
+	private final Gson GSON;
+ 
 	public MineLaup(String url, String launcherName, String apiKey, File launcherDir) throws IOException, MineLaupException {
         if(isValidUrl(url)) throw new MalformedURLException("Url non valide");
         this.URL = url;
@@ -35,7 +41,10 @@ public class MineLaup {
         this.LAUNCHER_NAME = launcherName;
         if(!launcherDir.exists()) launcherDir.mkdirs();
         this.LAUNCHER_DIRECTORY = launcherDir;
-
+        
+        GSON = new GsonBuilder().disableHtmlEscaping().serializeNulls().setPrettyPrinting().create();
+		
+		LAUNCHER_DATA = getLauncherInfo();
     }
 
 
@@ -43,9 +52,8 @@ public class MineLaup {
         return url.matches(URL_REGEX);
     }
 
-    private boolean getLauncherInfo() throws IOException, MineLaupException {
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(URL.endsWith("/") ? URL + "LauncherInfo" : URL + "/LauncherInfo").newBuilder();
-        urlBuilder.addQueryParameter("name", LAUNCHER_NAME);
+    private LauncherModel getLauncherInfo() throws IOException, MineLaupException {
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(URL.endsWith("/") ? URL + "game" : URL + "/game").newBuilder();
         String finalUrl = urlBuilder.build().toString();
 
         Request request = new Request.Builder()
@@ -54,10 +62,33 @@ public class MineLaup {
                 .build();
 
         Response response = client.newCall(request).execute();
-        if(response.code() == 404) throw new LauncherNotFoundException("Launcher innexistant");
+        if(response.code() == 404) throw new NotFoundException("Launcher innexistant");
 	    if(response.code() == 401) throw new WrongKeyException("Clée éronnée ");
-        System.out.print(response.message());
-        return !response.message().isEmpty();
+	    if(response.code() == 403) throw new DisabledException("Launcher désactivé");
+	    String json = response.message();
+        System.out.print(json);
+        LauncherModel modelToEnd = GSON.fromJson(json, LauncherModel.class);
+        modelToEnd.setModpacks(getModPack(modelToEnd.getModPacks()));
+        return modelToEnd;
+    }
+    
+    private List<ModPackModel> getModPack(List<ModPackModel> packList) throws MineLaupException, IOException {
+	   for(ModPackModel modPack : packList){
+		   HttpUrl.Builder urlBuilder = HttpUrl.parse(URL.endsWith("/") ? URL + "game/modpack" : URL + "/game/modpack").newBuilder();
+		   urlBuilder.addQueryParameter("id", Integer.toString(modPack.getId()));
+		   String finalUrl = urlBuilder.build().toString();
+		
+		   Request request = new Request.Builder()
+				                      .url(finalUrl)
+				                      .build();
+		   Response response = client.newCall(request).execute();
+		   if(response.code() == 404) throw new NotFoundException("Modpack version not found");
+		   if(response.code() == 403) throw new DisabledException("Modpack désactivé");
+		   String json = response.message();
+		   ModPackModel mod = GSON.fromJson(json, ModPackModel.class);
+		   modPack.setVersion(mod.getVersion());
+	   }
+		return packList;
     }
     
     
