@@ -50,13 +50,15 @@ public class ModPackModel {
 		private String summary;
 		private String created_at;
 		private int modpack_id;
+		private String mc_version;
 		
-		public VersionsInfo(int id, String version, String summary, String created_at, int modpack_id) {
+		public VersionsInfo(int id, String version, String summary, String created_at, int modpack_id, String mc_version) {
 			this.id = id;
 			this.version = version;
 			this.summary = summary;
 			this.created_at = created_at;
 			this.modpack_id = modpack_id;
+			this.mc_version = mc_version;
 		}
 		
 		public int getId() {
@@ -77,6 +79,10 @@ public class ModPackModel {
 		
 		public int getModpack_id() {
 			return modpack_id;
+		}
+		
+		public String getMcVersion() {
+			return mc_version;
 		}
 	}
 	

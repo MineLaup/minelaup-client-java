@@ -44,4 +44,9 @@ public class ModPackManager {
 		return data.getModPacks().stream().filter(mod -> mod.getId() == id).findFirst().orElse(null);
 	}
 	
+	
+	public ModPackModel[] getModPacksForMCVersion(String version){
+		return (ModPackModel[]) data.getModPacks().stream().filter(mod -> mod.getVersion().getMcVersion().equals(version)).toArray();
+	}
+	
 }
