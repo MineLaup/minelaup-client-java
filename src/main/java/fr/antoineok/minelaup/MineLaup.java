@@ -45,6 +45,7 @@ public class MineLaup {
         GSON = new GsonBuilder().disableHtmlEscaping().serializeNulls().setPrettyPrinting().create();
 		
 		LAUNCHER_DATA = getLauncherInfo();
+		System.out.println(GSON.toJson(LAUNCHER_DATA));
     }
 
 
