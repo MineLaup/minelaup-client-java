@@ -65,6 +65,10 @@ public class MineLaup {
         return modelToEnd;
     }
     
+    public LauncherModel getLauncherData(){
+		return LAUNCHER_DATA;
+    }
+    
     private List<ModPackModel> getModPack(List<ModPackModel> packList) throws MineLaupException, IOException {
 	   for(ModPackModel modPack : packList){
 		   HttpUrl.Builder urlBuilder = HttpUrl.parse(URL.endsWith("/") ? URL + "game/modpack" : URL + "/game/modpack").newBuilder();
