@@ -64,10 +64,9 @@ public class MineLaup {
 
         Response response = client.newCall(request).execute();
         if(response.code() == 404) throw new NotFoundException("Launcher innexistant");
-	    if(response.code() == 401) throw new WrongKeyException("Clée éronnée ");
+	    if(response.code() == 401) throw new WrongKeyException("Clée éronnée");
 	    if(response.code() == 403) throw new DisabledException("Launcher désactivé");
 	    String json = response.message();
-        System.out.print(json);
         LauncherModel modelToEnd = GSON.fromJson(json, LauncherModel.class);
         modelToEnd.setModpacks(getModPack(modelToEnd.getModPacks()));
         return modelToEnd;
@@ -80,10 +79,12 @@ public class MineLaup {
 		   String finalUrl = urlBuilder.build().toString();
 		
 		   Request request = new Request.Builder()
+				                     .header("Authorization", API_KEY)
 				                      .url(finalUrl)
 				                      .build();
 		   Response response = client.newCall(request).execute();
 		   if(response.code() == 404) throw new NotFoundException("Modpack version not found");
+		   if(response.code() == 401) throw new WrongKeyException("Clée éronnée");
 		   if(response.code() == 403) throw new DisabledException("Modpack désactivé");
 		   String json = response.message();
 		   ModPackModel mod = GSON.fromJson(json, ModPackModel.class);
