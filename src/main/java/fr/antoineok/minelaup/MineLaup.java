@@ -79,7 +79,7 @@ public class MineLaup {
 		   if(response.code() == 404) throw new NotFoundException("Modpack version not found");
 		   if(response.code() == 401) throw new WrongKeyException("Clée éronnée");
 		   if(response.code() == 403) throw new DisabledException("Modpack désactivé");
-		   String json = response.message();
+		   String json = response.body().string();
 		   System.out.println(json);
 		   ModPackModel mod = GSON.fromJson(json, ModPackModel.class);
 		   modPack.setVersion(mod.getVersion());
