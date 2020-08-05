@@ -6,7 +6,6 @@ import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import com.sun.istack.internal.NotNull;
 import fr.antoineok.minelaup.exceptions.*;
 import fr.antoineok.minelaup.modeles.LauncherModel;
 import fr.antoineok.minelaup.modeles.ModPackModel;
@@ -49,7 +48,7 @@ public class MineLaup {
     }
 
 
-    private boolean isValidUrl(@NotNull String url){
+    private boolean isValidUrl(String url){
         return url.matches(URL_REGEX);
     }
 
