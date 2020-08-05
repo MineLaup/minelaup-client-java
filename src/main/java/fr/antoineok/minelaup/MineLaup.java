@@ -58,7 +58,7 @@ public class MineLaup {
         if(response.code() == 404) throw new NotFoundException("Launcher innexistant");
 	    if(response.code() == 401) throw new WrongKeyException("Clée invalide");
 	    if(response.code() == 403) throw new DisabledException("Launcher désactivé");
-	    String json = response.message();
+	    String json = response.body().string();
 	    System.out.println(json);
         LauncherModel modelToEnd = GSON.fromJson(json, LauncherModel.class);
         modelToEnd.setModpacks(getModPack(modelToEnd.getModPacks()));
