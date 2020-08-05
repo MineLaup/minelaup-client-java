@@ -13,6 +13,7 @@ import fr.antoineok.minelaup.modeles.ModPackModel;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 @SuppressWarnings({"unused"})
@@ -28,13 +29,10 @@ public class MineLaup {
     
     private final LauncherModel LAUNCHER_DATA;
 
-    private static final String URL_REGEX =
-            "^((https?://)(%[0-9A-Fa-f]{2}|[-()_.!~*';/?:@&=+$,A-Za-z0-9])+)([).!';/?:,][[:blank:]])?$";
-
 	private final Gson GSON;
  
 	public MineLaup(String url, String launcherName, String apiKey, File launcherDir) throws IOException, MineLaupException {
-        if(isValidUrl(url)) throw new MalformedURLException("Url non valide");
+        new URL(url);
         this.URL = url;
         this.API_KEY = apiKey;
         this.LAUNCHER_NAME = launcherName;
@@ -46,12 +44,7 @@ public class MineLaup {
 		LAUNCHER_DATA = getLauncherInfo();
 		System.out.println(GSON.toJson(LAUNCHER_DATA));
     }
-
-
-    private boolean isValidUrl(String url){
-        return url.matches(URL_REGEX);
-    }
-
+    
     private LauncherModel getLauncherInfo() throws IOException, MineLaupException {
         HttpUrl.Builder urlBuilder = HttpUrl.parse(URL.endsWith("/") ? URL + "game" : URL + "/game").newBuilder();
         String finalUrl = urlBuilder.build().toString();
@@ -63,9 +56,10 @@ public class MineLaup {
 
         Response response = client.newCall(request).execute();
         if(response.code() == 404) throw new NotFoundException("Launcher innexistant");
-	    if(response.code() == 401) throw new WrongKeyException("Clée éronnée");
+	    if(response.code() == 401) throw new WrongKeyException("Clée invalide");
 	    if(response.code() == 403) throw new DisabledException("Launcher désactivé");
 	    String json = response.message();
+	    System.out.println(json);
         LauncherModel modelToEnd = GSON.fromJson(json, LauncherModel.class);
         modelToEnd.setModpacks(getModPack(modelToEnd.getModPacks()));
         return modelToEnd;
@@ -86,6 +80,7 @@ public class MineLaup {
 		   if(response.code() == 401) throw new WrongKeyException("Clée éronnée");
 		   if(response.code() == 403) throw new DisabledException("Modpack désactivé");
 		   String json = response.message();
+		   System.out.println(json);
 		   ModPackModel mod = GSON.fromJson(json, ModPackModel.class);
 		   modPack.setVersion(mod.getVersion());
 	   }
